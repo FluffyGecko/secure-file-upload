@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Secure File Upload | Emanuelson Podas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #ffffff;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #003a8f;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .dropdown-list {
+      position: absolute;
+      width: 100%;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-top: none;
+      background: #fff;
+      display: none;
+      z-index: 1000;
+    }
+
+    .dropdown-item {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f0f4ff;
+    }
+
+    button {
+      margin-top: 24px;
+      background-color: #003a8f;
+      color: #fff;
+      border: none;
+      padding: 12px 28px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #002f73;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Secure File Upload</h1>
+
+    <p>
+      Use this page to securely upload files requested by an Emanuelson Podas team member.
+      Select or search for the person you are uploading files for.
+    </p>
+
+    <label for="selector">Upload files for:</label>
+
+    <div class="dropdown">
+      <input
+        type="text"
+        id="selector"
+        placeholder="Select or start typing a name..."
+        autocomplete="off"
+      />
+      <div id="dropdownList" class="dropdown-list"></div>
+    </div>
+
+    <button id="uploadBtn" disabled>Upload files</button>
+  </div>
+
+  <script>
+    const targets = [
+      { name: "Abdel Elkhatib", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCFrKunfh72SLtUqJ0HfzCGARj0Fe06-TmI_d-2ezUelsM" },
+      { name: "Adam Bruns", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCGPaO5FsS6Sa89VqJw0NP1AXUU5fVbotg65fPIVCFtBZc" },
+      { name: "Aidan Reilly", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAFOoDB17FCQKf6GukvqojdAabDHwJ_Z61PK5Hhz64PhCQ" },
+      { name: "Alex Gregor", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDi72ax6BO9SKJexHKBSPZvAXv8DxBVqlr-rvMoe7Ad6XM" },
+      { name: "Alex Webert", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDcbyY52w6rTofe6CbHIgQYAZHsHX0eNpdA5_jLeTNpjG4" },
+      { name: "Alexa Boesch", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgB6g66HdHVRRKcp4NmxZoOVAaqhmGROlU6Q1pWhBI4Vgys" },
+      { name: "Alexa Ocel", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDTrCELmhAHRYd6HZVTiEuWATdB3ngaaiu1ujWk4omLfQg" },
+      { name: "Alexis Stotko", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCsGA4yU_BvSplkrbr0gTU4AV3J9cdRi_TbHgif46AFCm8" },
+      { name: "Andres Hernandez Garcia", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC-T1V0IK05QZ_raHBQHK7pAdY2ACHl26OZRdqUQO8Wq3k" },
+      { name: "Annie Murillo", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDfTGSBliOwToynetQtv9zFAdI84ASHiee6rPkO_sXiG80" },
+      { name: "Ben Bahr", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBes_Jm-EWxRIxljD8M5SfuAZU9mw_qr4R87Ob9NqscmAU" },
+      { name: "Ben Fults", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgA1xHSb7sDEQKgTy90Ixln0Aa3Bh8uWWPCJYzCGIZintbE" },
+      { name: "Ben Ricci", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAiyMgqNoS5Srfats8vv3MiAeYRCWe2i2e3KvVNsUXtp_A" },
+      { name: "Bradley Johnson", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDXODcZmB2bRbdn7q7C2HD4AS-nPl0rPQ1MdfdpvnuUvVc" },
+      { name: "Braydon Wald", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBVACQl-2yBSrpmEHgQJ9b6AZ0F4dLToBHUgFQ7kq8Gf8I" },
+      { name: "Brian Berggren", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgB4bPEDBCIgSLko9MZ1bi22AWknPrTW9fLrlMm2y3W3YfY" },
+      { name: "Brian GBrundmeyer", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCfAqrqvvF-RL5WWaP_Xg_KAZ_STzFCawxRxRd-7-ZAjRQ" },
+      { name: "Braydon Wald", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBVACQl-2yBSrpmEHgQJ9b6AZ0F4dLToBHUgFQ7kq8Gf8I" },
+      { name: "Brian Ringsven", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDzsZHeicggQ7ogoS0NjPCoAY5eLjS2imx8gFi-_fF0Eq8" },
+      { name: "Cara Montgomery", URL: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBjs5eEZPaeRpNa7rFNopsuAZilE5WgnrzplCc26BNjmnw" },
+      { name: "Chris Blissett", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDpoianB0o3Q7xMNxOqjwipASSebycpTZI4SGFb3G3I9uk" },
+      { name: "Chris Eastman", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDQKnl8VmiiRqWGOyTSfN0pAQinK-hi0etISisePOXTl2w" },
+      { name: "Chris Konechne", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAQ6VfytiD4QLVQuzCEbJEOASqXA0C5jfZmO9E1taH9528" },
+      { name: "Christof Barrier", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDTFFwPtXuQTb9PU4w6_VpXARpw3LCJ46EvlcDN8GF4kME" },
+      { name: "CJ Leppla", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCa3Wz2owJ_TZf4DqcBKvtOAdBRmHA5rtzzsjQjnJ3cGCY" },
+      { name: "Clair Witzmann", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC-TgJT2nafS6QkMA4DChjXAW36uNPf-m3j803qzlrP_yU" },
+      { name: "Cole Setten", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDCIA_guTYSTJRhws6OK0VDATm6c2waIDrt3ihiOyE-CDo" },
+      { name: "Colten Berkner", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCzQFI7z8ZBQZFYXL9r-nYnAWdAhtIAIsGKBHsGdLenS9c" },
+      { name: "Corbin Johnson", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgB9cYReu1K9S5QpfT__mcxQATI-j5oaUZhD2j3Hnsj3o48" },
+      { name: "Dan Dahlman", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBN7xsdBDmbQLtXGAk7L8eDAfwUSV1Mw-eQuIqnqvwn0fU" },
+      { name: "Dana Billman", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCLiUDradpIQK1PA7mH9Wn1AQY1RWUNCPAvhelqS_Zsxko" },
+      { name: "Danny Johnson", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDKBgU6kKeVSIxVeNjNIW9rAWRSZANUnM4smTF3dhEuHmc" },
+      { name: "David Hasslinger", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgB8w8kI1jmsSIzdMY7HqSdWAbNWBqJjmMs3R4Mhm1N0yjc" },
+      { name: "David Ricard", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDGzLtvGMBXQZ8p4Q2XERjyAXCdf1RvH-eUsRWHi0xq_9I" },
+      { name: "Denzel Morancie", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCl3Jeeebm4SKWuiAguHYEgAVUmbJsD9w_LJNuRfawCshg" },
+      { name: "Dustin Fitzwater", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAFonSJ2wpYSqt7j7O1SUjAAW7cROglqJsWHv7YTbpm-Ec" },
+      { name: "Dylan Brady", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAu-RxfOxiHQKglxEy3BJpPAZmeBf8DmEK5Dkco18NCo6Y" },
+      { name: "Dylan Olson", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDJCW-buv7RRrCNcmPHygVJAQMuk-IOGiknWttm6JTDHxE" },
+      { name: "Eric Rose", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAAu7bLJjX2Q4vh0znEwTCxARv88Qk0LkVB5gNpuy9VRcE" },
+      { name: "Eric Schultz", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC_PS-o0LPTQLuicL8ejG6YASD7oJgaZcStJrXRNCl7Ntk" },
+      { name: "Erin Ludvigson", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDIWMY7W--mTJOLqATOL-SVAQUbd9H8irXtsUwWcGlNpTU" },
+      { name: "Ethan Wolff", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgB7pu7AR2HCSoyJ_KG_3pFKAX55lvdsWJMyIHYe_rGBbjI" },
+      { name: "Felipe Soares Barbosa", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC79-gSb1XvRo3bAXOj8Y2TAVkbCyuo1lvL_QJofPtl5WM" },
+      { name: "Gallad Mohamed", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgD5dHUqLrSRRIQgc2MHObVSAYNSCwa0l7AOby1F0AXfKGw" },
+      { name: "George Carney", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAJ0vg3xu_qTIJ00cBEXtvmAeezou9m6XN8OlQNI7DiM5c" },
+      { name: "Gonzalo Palacios Ginez", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC1QnBtl_7tRYsVIQcQ7gSgAYnKURNYIpJNoOE-QgAw7wI" },
+      { name: "Grant Camp", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAyveeJuFo0TJ2L8HQsPxXCAQpTqcsDtmx7uUEKwvoe-Mg" },
+      { name: "Grant Knight", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBg8rhfVrLIQYESnHq5GtFAAU0DmwJTxffqzzYblndTVv8" },
+      { name: "Hans Barkei", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAUzrWyfVJ6S7lqOUq4Uz0lAQ-Rd2JPH06aBYouql5IeIk" },
+      { name: "Hunter Dungey", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAlb8V9RhI7QacjENkTC8lSAQtjKWTqksCxjzNcRxEfKcg" },
+      { name: "Jack Thurk", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCDv5uwUW3qRLMMnpW9ZATjAY5-bi3KvOjB_qY-tIu9YH8" },
+      { name: "Jacob Garner", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAOqWluFT0oTqKxlZc7ckfeAWUPJHi7_IOgQPzypvMufP0" },
+      { name: "Jake Harriman", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC_5ubGZCeMQrSUzofu9VWfAcz8KiEmB--nUIp8HQcg8eU" },
+      { name: "Jake Kirsch", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDO1O89xRmGSI2iKz_0oHbMAWF-cdrb_K4wljXJ4gWQe80" },
+      { name: "Jake Murphy", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAQt752Ae3GQYGTbh9e4tslAWgeK8PwjlUDdyHr70ia_-8" },
+      { name: "Jason Place", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBedgAv0qt-QoXvZ__zGrV2AUeuuOoVVOIkEfhvpBzCA0I" },
+      { name: "Jen Iaquinto", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAcvYn1mCtKRoXq7C8vKrlnAbu4YjGvRL0xwTk9qFxa614" },
+      { name: "Jeremy Larson", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCQFUzAptHVRbyVdP7mCyqxAcIYpYniqXJXu1T5_Lf6vZ8" },
+      { name: "Joe Lapcewich", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC3VgTM4tqaSYSaB1GIqsOtATM68fUWR-1yZwaeIdAZne8" },
+      { name: "Joe Stoll", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBfdTsVwboZQrOa-tooQOqGAbIB4W98ZBkB5n90EYq2Ge0" },
+      { name: "Joel Visness", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCnZL52zgXvT5e7hkiasv26Ad4NFWIq5gfADHAfIjgZGoE" },
+      { name: "Joey Fincel", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAlhODLFBctQ7cr5c9j02p1AfeSxj4P9D3KV0IzGtJYq-g" },
+      { name: "John Endris", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDYX7XjaAUySrakE6mNm-EjAWCsExJpdiYg5wE1I-23kDg" },         { name: "John Henderson", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCRaND2d5vqQKUkSGUCz9tRAcYMlqXoL-Ta584TxACJNbY" },
+      { name: "John Krebs", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCb6oMFbVDHQ6lm0wleMsd-AcEQ70TePuZLpuFSGHse0HQ" },
+      { name: "John Nordstrom", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAGVq1tQi1GSJl_ncuUxoYzAbqzTz-UKAPbWDJP0HS7yWs" },
+      { name: "John Samuelson", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAfw7aZUJnfRoptwmXDE9UVATmGFaIv29pwx865TWj8lvE" },
+      { name: "Jon Burch", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBiuBos57vVToRCQFhX07bNARh5ajqLWn4xZmWWwWv5gkg" },
+      { name: "Jon Wessling", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC5og2XD_2OTrAqKeEzlVtYAcRKW5JZV-v5b7uaJ-qcKbI" },
+      { name: "Joseph Haynes", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDpr1IA2_Z4SaLhRZVryX1jASR2YkIt9_AkrZ9pGCSDYpY" },
+      { name: "Josh Gawrick", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCi8OZhlzxeSrWYE3govy8nAZQXFWUM7tlVUKl_5-ZdSSA" },
+      { name: "Josh Weddle", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBe2zQ0VndRRJuFZzgxpZCWAawZkWsmWbPd9vJEvxX-h1w" },
+      { name: "Julie Dahl", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC3cJEG-LAeQoE3HlisshaIAfgrF2ByUf7-g56mbqNVgCo" },
+      { name: "Justin Artz", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgB78C-DQIdDTrTlyiaaq52iAfEk3s6PG-tjmrt_5Cj1mqY" },
+      { name: "Kaben Hoffman", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCbHaPT1WnySrBsaH4a__86AZAm5zylqGEhtmHrPY1PhnI" },
+      { name: "Kaylee Caron", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBH97lmDGHiQphF70XhRMFVAfZQG5av9LjBTlo_umSa5r0" },
+      { name: "Keith O'brien", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBjHqjRYgHhTb3czTvFcfq_AduuCHz9ip9Dsyow7zCQMMc" },
+      { name: "Kelly Artz", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgA7W0wDnxIGQbZsEViSppcbAWk_iYXNW_2oHm89TgfQ0Kk" },
+      { name: "Kelsey Morgan", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDXWKCCDdR3QodU1bf6oO2fARThMeYoNdFWE8fs4U55TwA" },
+      { name: "Kevin Galbraith", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAt3vDP4H5BRKmxkGPTQlBcAdF_J17kTLMl9vF-k2OP9t0" },
+      { name: "Kyle McConnell", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDtd-wH_uN6SqB4bDbn53dQAchXy-y1c8j1LfnXbxzKEpQ" },
+      { name: "Lina Abajebel", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCgnKqsMnCKSaxoNr40yviOAdaB9dBnckdh03x2CjLUldI" },
+      { name: "Luke Eicher", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBELt88ZTgCTYmG_UcQsY6TAZC4tIjg89EohkdItwbuTbk" },
+      { name: "Lynn Morgel", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgADCZ1au975QoIqzpC5WxPyATnM7aXI--e9Mr2kwVO6wbQ" },
+      { name: "Mark Champion", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgB9E_suSrr_RrRA64--8ELDASy2-LNdIhIpVJFER34pnjM" },
+      { name: "Mark Zaharia", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgB77QrNwaJ-QrMQQSmJ8NEcAffbXD8gQpb3ZkFfTzVwWAc" },
+      { name: "Mathieu Lindquist", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBwCqddVu0fRbzeGGDZTMWOAfs0cFIVmGdro3HlPlpYA-I" },
+      { name: "Matt  Palodichuk", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBpPgB15POLRbSQ-iZ79tPjAfD8EcZfR-FojkXDvqRN9pI" },
+      { name: "Matt Beckett", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAVSa0xaKVrRY9tprwDgaTEATziDCz3xUJsSibQRUUKmUI" },
+      { name: "Matt Christensen", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgB6vOcmR47uS53Kvd7RTbXbAY7pdU3WpkaqQE347_AqIl0" },
+      { name: "Matt Fults", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgD8Zh1fmWnATrPJ5ZpZ3IQKAT9EUFZhg6YNmMNZUHRpa00" },
+      { name: "Matt Groves", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDdc5etbnP5S4xRgt1C8RcfAVKCeWMezWQj1MpO-jiqzEc" },
+      { name: "Matt Laursen", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC5rY6CoQZzQbX5z46ifB-qARVS3njPDcT8hou5M-YxhQM" },
+      { name: "Matt Wenborg", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBeZUbXc1ZARaHpFDPVDIzGAcjutGrdOLCkSw7pVKBlHSo" },
+      { name: "Michael Shannon", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDHwSquByiTT6mpTphZrVhnAa_Ra7KWNuHuNGRHX3Louzk" },
+      { name: "Miguel Giron-Moreira", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBumgc5UFgTR6ZAqC_5S9JXAbqJfMKKBU9own2_MCoCOes" },
+      { name: "Mike Carey", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBR66z5xJpfTrNBkiOMCUfCAZyzaekhuUqho_KFmpsch_8" },
+      { name: "Mike Heuer", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDfNokm7fe_QqDf3gcAVgG2AXtSFP5waPLo-N-o9IVAb1I" },
+      { name: "Mike Webert", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAFQPhd-UNqR4E3NCn-Pc8AARXwjxhtTDsOIU6H55SeJUA" },
+      { name: "Miranda Fish", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgChQMgWJcxFQqsTz7HWQpR2AfIvjlZLgtE9eB7vRQUZ57E" },
+      { name: "Mitchell Gould", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDl4yzo5cXxQ7_FsZQODBKKAc4trrxYbke5Z8k9HbADSXE" },
+      { name: "Mitchell Thomas", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCPjWckgs7eQK6tfZ_HtJK_AfozBKOob8Tu-eghNIIXT9U" },
+      { name: "Mohammad Alholi", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBfGRShpRtrRIL1F_qtQvM0AU6oU1CQF05OWaDRqSAF-tY" },
+      { name: "Nikki Leibl", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDM-rf9WI-LQ5KIFMbIX9lfASM0ueqGuaWZsghznQIOe_E" },
+      { name: "Noah Oehlke", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCDoJeDTUhfSqSzkOYr8mwqAXv23WJnWO2JHwHIYPDZfv0" },
+      { name: "Noah Olson", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAO3X-LlXbWRKh_TVMxcWbvAdkvHKBH86RZL629i5r6188" },
+      { name: "Rick Dale", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDivCsp5HYKSa7ssXKFZAeCATuQr6_jh7xutCVnWHyYIzw" },
+      { name: "Ryan Lentz", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBaN38RYuWkTouBgmazC_CwAZmo7by3q7I1q1qR6fFVwZ8" },
+      { name: "Sam Fortin", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDgRFImtyCnSbjSR2rxVpr-AVgR3CwQHny_EIP7icZsHGc" },
+      { name: "Scott Vander Heiden", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgC4WRPun0skR6CyWJ9E5Ib9AWET_1hrGsBMGYrkVEq8W6w" },
+      { name: "Sergio Castillo", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBmYSyAD2w5Rb8oW8enN2nVAZaMoIWBRl6CioP3PGwaEiY" },
+      { name: "Shawn Inlay", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCqsZG8teHHTpAkljP_jCYuAY2J69fH5BdiC0htSs45blk" },
+      { name: "Shenthur Senthil Kumar", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBIZidgXuv9T4QOR4dYAnvVAUATlZ9U2uFhU7V5tHlIVQk" },
+      { name: "Spencer Cummings", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgClW1zTCDt-To2FPtOdWVM1AdDPOMGRnTFhV6fgHcZJBpY" },
+      { name: "Steve Lange", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgCIbTZrxGtTQpL5C3WtJycVATvplow0aDD_YE3Ey__OXVg" },
+      { name: "Sue Schaefer", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgD46Eo-gIx5TLSFnDJu9fuAAajFqs0LpFZBSjtjk_0ZkCE" },
+      { name: "Tanya Erhardt", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBILx8qoYwpSpvKjTYY4QKVAWDkimjK-qxhmYdKP0P-S6U" },
+      { name: "Tenzin Younten", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgD7M90gXPffQ6_mwpWZdJDmAYwJloqRJGFopu6BwTrqWzk" },
+      { name: "Tom Ellingboe", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgDQq40xphXgSrmNT-zMmTsZAbqcPndXmQywb81osPumi9g" },
+      { name: "Tom Roberts", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAF-jpX-LWlRJekx4D36nqFAbNxzESARfCuPv-EXcp4J7c" },
+      { name: "Troy Nystrom", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgA0usaaeYqXQ5GkLsoHiKCgAS7IWcMzBsRvDf0L30odBGc" },
+      { name: "Wendy Wenborg", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgAMYG01aa3DSJnrveU5zJCHAUlpWAySv1q76OHWL7d5C4I" },
+      { name: "William O'brien", url: "https://emanuelsonpodas.sharepoint.com/:f:/s/EPExternalUploads/IgBdM0u08GyWTYM0GQJH9nrOAVO-vYMgm7jsBHrn3vgnQnY" },
+
+      // ✅ Remaining entries continue in exact same format
+    ];
+
+    // ✅ Always sort alphabetically
+    targets.sort((a, b) => a.name.localeCompare(b.name));
+
+    const input = document.getElementById("selector");
+    const list = document.getElementById("dropdownList");
+    const button = document.getElementById("uploadBtn");
+
+    let selectedUrl = null;
+
+    function renderList(filter = "") {
+      list.innerHTML = "";
+
+      const matches = targets.filter(t =>
+        t.name.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      matches.forEach(match => {
+        const div = document.createElement("div");
+        div.className = "dropdown-item";
+        div.textContent = match.name;
+        div.onclick = () => {
+          input.value = match.name;
+          selectedUrl = match.url;
+          list.style.display = "none";
+          button.disabled = false;
+        };
+        list.appendChild(div);
+      });
+
+      list.style.display = matches.length ? "block" : "none";
+    }
+
+    input.addEventListener("focus", () => renderList());
+    input.addEventListener("input", () => {
+      selectedUrl = null;
+      button.disabled = true;
+      renderList(input.value);
+    });
+
+    document.addEventListener("click", e => {
+      if (!e.target.closest(".dropdown")) {
+        list.style.display = "none";
+      }
+    });
+
+    button.onclick = () => {
+      if (selectedUrl) {
+        window.location.href = selectedUrl;
+      }
+    };
+  </script>
+</body>
+</html>
